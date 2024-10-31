@@ -64,16 +64,16 @@ public class PlatformCalendarDataProxy extends DataProxy {
     private final long EVENT_SELECTION_PERIOD_FORWARD = 11 * 24 * 60 * 60 * 1000; // 11 days
     // Uses SQLite (http://www.sqlite.org/lang_select.html)
     private final String TITLE_PREFERENCE_SORT_ORDER =
-        "CASE " + CalendarContract.Attendees.ATTENDEE_RELATIONSHIP + " " +
-            "WHEN " + CalendarContract.Attendees.RELATIONSHIP_ORGANIZER + " THEN 1 " +
-            "WHEN " + CalendarContract.Attendees.RELATIONSHIP_SPEAKER + " THEN 2 " +
-            "WHEN " + CalendarContract.Attendees.RELATIONSHIP_PERFORMER + " THEN 3 " +
-            "WHEN " + CalendarContract.Attendees.RELATIONSHIP_ATTENDEE + " THEN 4 " +
-            "ELSE 5 END, " +
-            "CASE " + CalendarContract.Attendees.ATTENDEE_STATUS + " " +
-            "WHEN " + CalendarContract.Attendees.ATTENDEE_STATUS_ACCEPTED + " THEN 1 " +
-            "WHEN " + CalendarContract.Attendees.ATTENDEE_STATUS_DECLINED + " THEN 3 " +
-            "ELSE 2 END";
+            "CASE " + CalendarContract.Attendees.ATTENDEE_RELATIONSHIP + " " +
+                    "WHEN " + CalendarContract.Attendees.RELATIONSHIP_ORGANIZER + " THEN 1 " +
+                    "WHEN " + CalendarContract.Attendees.RELATIONSHIP_SPEAKER + " THEN 2 " +
+                    "WHEN " + CalendarContract.Attendees.RELATIONSHIP_PERFORMER + " THEN 3 " +
+                    "WHEN " + CalendarContract.Attendees.RELATIONSHIP_ATTENDEE + " THEN 4 " +
+                    "ELSE 5 END, " +
+                    "CASE " + CalendarContract.Attendees.ATTENDEE_STATUS + " " +
+                    "WHEN " + CalendarContract.Attendees.ATTENDEE_STATUS_ACCEPTED + " THEN 1 " +
+                    "WHEN " + CalendarContract.Attendees.ATTENDEE_STATUS_DECLINED + " THEN 3 " +
+                    "ELSE 2 END";
     // Preferred account, or null if any account is good
     String account = null;
     TimeZone SYSTEM_TZ = java.util.Calendar.getInstance().getTimeZone();
@@ -84,7 +84,7 @@ public class PlatformCalendarDataProxy extends DataProxy {
     // for each room until they get synced. Access but altering the Set objects
     // or modifying the structure of the Map must be within a synchronized block.
     private Map<Room, HashSet<Reservation>> locallyCreatedReservationCaches =
-        Collections.synchronizedMap(new HashMap<Room, HashSet<Reservation>>());
+            Collections.synchronizedMap(new HashMap<Room, HashSet<Reservation>>());
 
     /**
      * @param resolver       From application context. Used to access the platform's Calendar Provider.
@@ -148,9 +148,9 @@ public class PlatformCalendarDataProxy extends DataProxy {
         syncGoogleCalendarAccount(accountName);
 
         Reservation createdReservation = new Reservation(
-            Long.toString(eventId) + "-" + Long.toString(timeSpan.getStart().getTimeInMillis()),
-            owner,
-            timeSpan);
+                Long.toString(eventId) + "-" + Long.toString(timeSpan.getStart().getTimeInMillis()),
+                owner,
+                timeSpan);
         createdReservation.setIsCancellable(true);
         putToLocalCache(room, createdReservation);
     }
@@ -168,11 +168,11 @@ public class PlatformCalendarDataProxy extends DataProxy {
         String mSortOrder = null;
 
         Cursor result = resolver.query(
-            CalendarContract.Calendars.CONTENT_URI,
-            mProjection,
-            mSelectionClause,
-            mSelectionArgs,
-            mSortOrder);
+                CalendarContract.Calendars.CONTENT_URI,
+                mProjection,
+                mSelectionClause,
+                mSelectionArgs,
+                mSortOrder);
 
         if (result == null) {
             throw new ReservatorException("Room calendar has been deleted");
@@ -212,11 +212,11 @@ public class PlatformCalendarDataProxy extends DataProxy {
         String[] mSelectionArgs = {};
         String mSortOrder = null;
         Cursor result = resolver.query(
-            eventUri,
-            mProjection,
-            mSelectionClause,
-            mSelectionArgs,
-            mSortOrder);
+                eventUri,
+                mProjection,
+                mSelectionClause,
+                mSelectionArgs,
+                mSortOrder);
 
         if (result == null) {
             return; // Event has already been deleted!
@@ -279,6 +279,17 @@ public class PlatformCalendarDataProxy extends DataProxy {
         }
     }
 
+    /**
+     * Added so I can call the sync from outside the class.
+     * @param room - The room to sync
+     * @throws ReservatorException - If the account has been deleted
+     */
+    public void syncGoogleCalendarAccount(Room room) throws ReservatorException {
+        PlatformCalendarRoom plcRoom = (PlatformCalendarRoom) room;
+        String accountName = getAccountName(plcRoom.getId());
+        syncGoogleCalendarAccount(accountName);
+    }
+
     @Override
     public Vector<Room> getRooms() {
         setSyncOn();
@@ -286,17 +297,16 @@ public class PlatformCalendarDataProxy extends DataProxy {
         Vector<Room> rooms = new Vector<Room>();
 
         String[] mProjection = {
-            CalendarContract.Calendars._ID,
-            CalendarContract.Calendars.OWNER_ACCOUNT,
-            CalendarContract.Calendars.NAME,
-            CalendarContract.Calendars.CALENDAR_LOCATION};
+                CalendarContract.Calendars._ID,
+                CalendarContract.Calendars.OWNER_ACCOUNT,
+                CalendarContract.Calendars.NAME,
+                CalendarContract.Calendars.CALENDAR_LOCATION};
 
 
-        ArrayList<String>  mSelectionClauses = new ArrayList<String>();
+        ArrayList<String> mSelectionClauses = new ArrayList<String>();
         ArrayList<String> mSelectionArgs = new ArrayList<String>();
 
-        if (this.calendarMode == Mode.RESOURCES)
-        {
+        if (this.calendarMode == Mode.RESOURCES) {
             mSelectionClauses.add(CalendarContract.Calendars.OWNER_ACCOUNT + " GLOB ?");
             mSelectionArgs.add(Mode.RESOURCES.resourcesGlob);
         }
@@ -307,11 +317,11 @@ public class PlatformCalendarDataProxy extends DataProxy {
         String mSortOrder = null;
 
         Cursor result = resolver.query(
-            CalendarContract.Calendars.CONTENT_URI,
-            mProjection,
-            TextUtils.join(" AND ", mSelectionClauses),
-            mSelectionArgs.toArray(new String[0]),
-            mSortOrder);
+                CalendarContract.Calendars.CONTENT_URI,
+                mProjection,
+                TextUtils.join(" AND ", mSelectionClauses),
+                mSelectionArgs.toArray(new String[0]),
+                mSortOrder);
 
         if (result != null) {
             if (result.getCount() > 0) {
@@ -323,10 +333,10 @@ public class PlatformCalendarDataProxy extends DataProxy {
                         location = name;
                     }
                     rooms.add(new PlatformCalendarRoom(
-                        name,
-                        result.getString(1),
-                        result.getLong(0),
-                        location));
+                            name,
+                            result.getString(1),
+                            result.getLong(0),
+                            location));
                 } while (result.moveToNext());
             }
             result.close();
@@ -352,6 +362,7 @@ public class PlatformCalendarDataProxy extends DataProxy {
 
     @Override
     public Vector<Reservation> getRoomReservations(Room r) throws ReservatorException {
+        Log.d("THINGY", "Getting room reservations");
         if (!(r instanceof PlatformCalendarRoom)) {
             return new Vector<Reservation>();
         }
@@ -411,20 +422,20 @@ public class PlatformCalendarDataProxy extends DataProxy {
     }
 
     private HashSet<Reservation> getInstancesTableReservations(
-        PlatformCalendarRoom room, long minTime, long maxTime, String calendarAccount) {
+            PlatformCalendarRoom room, long minTime, long maxTime, String calendarAccount) {
         HashSet<Reservation> reservations = new HashSet<Reservation>();
 
         String[] mProjection = {
-            CalendarContract.Instances.EVENT_ID,
-            CalendarContract.Instances.TITLE,
-            CalendarContract.Instances.BEGIN,
-            CalendarContract.Instances.END,
-            CalendarContract.Instances.ORGANIZER
+                CalendarContract.Instances.EVENT_ID,
+                CalendarContract.Instances.TITLE,
+                CalendarContract.Instances.BEGIN,
+                CalendarContract.Instances.END,
+                CalendarContract.Instances.ORGANIZER
         };
         String mSelectionClause =
-            CalendarContract.Instances.CALENDAR_ID + " = " + room.getId() + " AND " +
-                CalendarContract.Instances.STATUS + " != " + CalendarContract.Instances.STATUS_CANCELED + " AND " +
-                CalendarContract.Instances.SELF_ATTENDEE_STATUS + " != " + CalendarContract.Attendees.STATUS_CANCELED;
+                CalendarContract.Instances.CALENDAR_ID + " = " + room.getId() + " AND " +
+                        CalendarContract.Instances.STATUS + " != " + CalendarContract.Instances.STATUS_CANCELED + " AND " +
+                        CalendarContract.Instances.SELF_ATTENDEE_STATUS + " != " + CalendarContract.Attendees.STATUS_CANCELED;
         String[] mSelectionArgs = {};
         String mSortOrder = null;
 
@@ -433,11 +444,11 @@ public class PlatformCalendarDataProxy extends DataProxy {
         ContentUris.appendId(builder, maxTime);
 
         Cursor result = resolver.query(
-            builder.build(),
-            mProjection,
-            mSelectionClause,
-            mSelectionArgs,
-            mSortOrder);
+                builder.build(),
+                mProjection,
+                mSelectionClause,
+                mSelectionArgs,
+                mSortOrder);
 
         if (result != null) {
             if (result.getCount() > 0) {
@@ -448,12 +459,12 @@ public class PlatformCalendarDataProxy extends DataProxy {
                     long start = result.getLong(2);
                     long end = Math.max(start, result.getLong(3));
                     String eventOrganizerAccount = result.getString(4);
-                  //  Log.d("ReservationDetails", "id=" + eventId + ", title=" + title + ", organizer=" + eventOrganizerAccount);
+                    //  Log.d("ReservationDetails", "id=" + eventId + ", title=" + title + ", organizer=" + eventOrganizerAccount);
 
                     Reservation res = new Reservation(
-                        Long.toString(eventId) + "-" + Long.toString(start),
-                        makeEventTitle(room.getName(), eventId, title, eventOrganizerAccount, DEFAULT_MEETING_NAME),
-                        new TimeSpan(new DateTime(start), new DateTime(end)));
+                            Long.toString(eventId) + "-" + Long.toString(start),
+                            makeEventTitle(room.getName(), eventId, title, eventOrganizerAccount, DEFAULT_MEETING_NAME),
+                            new TimeSpan(new DateTime(start), new DateTime(end)));
                     if (eventOrganizerAccount != null && calendarAccount.equals(eventOrganizerAccount.toLowerCase(Locale.getDefault()))) {
                         res.setIsCancellable(true);
                     }
@@ -482,6 +493,9 @@ public class PlatformCalendarDataProxy extends DataProxy {
     private String makeEventTitle(final String roomName, final long eventId, final String storedTitle, final String organizer,
                                   final String defaultTitle) {
         for (String attendee : getAuthoritySortedAttendees(eventId)) {
+            if (storedTitle != null && !storedTitle.isEmpty()) {
+                return storedTitle;
+            }
             if (attendee != null && !attendee.isEmpty() && !attendee.equals(roomName)) {
                 return attendee;
             }
@@ -497,7 +511,7 @@ public class PlatformCalendarDataProxy extends DataProxy {
             }
         }
 
-       /// if (storedTitle != null && !storedTitle.isEmpty()) return storedTitle;
+        /// if (storedTitle != null && !storedTitle.isEmpty()) return storedTitle;
         return defaultTitle;
     }
 
@@ -505,26 +519,26 @@ public class PlatformCalendarDataProxy extends DataProxy {
         Vector<String> attendees = new Vector<String>();
 
         String[] mProjection = {
-            CalendarContract.Attendees.ATTENDEE_NAME,
+                CalendarContract.Attendees.ATTENDEE_NAME,
                 CalendarContract.Attendees.ATTENDEE_EMAIL,
-            CalendarContract.Attendees.ATTENDEE_RELATIONSHIP,
-            CalendarContract.Attendees.ATTENDEE_STATUS};
+                CalendarContract.Attendees.ATTENDEE_RELATIONSHIP,
+                CalendarContract.Attendees.ATTENDEE_STATUS};
         String mSelectionClause = CalendarContract.Attendees.EVENT_ID + " = " + eventId;
         String[] mSelectionArgs = {};
         String mSortOrder = TITLE_PREFERENCE_SORT_ORDER;
 
         Cursor result = resolver.query(
-            CalendarContract.Attendees.CONTENT_URI,
-            mProjection,
-            mSelectionClause,
-            mSelectionArgs,
-            mSortOrder);
+                CalendarContract.Attendees.CONTENT_URI,
+                mProjection,
+                mSelectionClause,
+                mSelectionArgs,
+                mSortOrder);
 
         if (result != null) {
             if (result.getCount() > 0) {
                 result.moveToFirst();
-               // Log.d("SortedAttendees", "eventId=" + eventId + ", attendeeName=" + result.getString(0) + ", attendeeEmail=" +
-               //         result.getString(1)+ ", " + result.getCount());
+                // Log.d("SortedAttendees", "eventId=" + eventId + ", attendeeName=" + result.getString(0) + ", attendeeEmail=" +
+                //         result.getString(1)+ ", " + result.getCount());
                 do {
                     if (result.getString(0) != null && !result.getString(0).isEmpty()) {
                         attendees.add(result.getString(0));
@@ -549,8 +563,7 @@ public class PlatformCalendarDataProxy extends DataProxy {
         ArrayList<String> mSelectionClauses = new ArrayList<String>();
         ArrayList<String> mSelectionArgs = new ArrayList<String>();
 
-        if(this.calendarMode == Mode.RESOURCES)
-        {
+        if (this.calendarMode == Mode.RESOURCES) {
             mSelectionClauses.add(CalendarContract.Calendars.OWNER_ACCOUNT + " GLOB ?");
             mSelectionArgs.add(Mode.RESOURCES.resourcesGlob);
         }
@@ -560,11 +573,11 @@ public class PlatformCalendarDataProxy extends DataProxy {
         String mSortOrder = null;
 
         Cursor result = resolver.query(
-            CalendarContract.Calendars.CONTENT_URI,
-            mProjection,
-            TextUtils.join(" AND ", mSelectionClauses),
-            mSelectionArgs.toArray(new String[0]),
-            mSortOrder);
+                CalendarContract.Calendars.CONTENT_URI,
+                mProjection,
+                TextUtils.join(" AND ", mSelectionClauses),
+                mSelectionArgs.toArray(new String[0]),
+                mSortOrder);
 
         if (result == null) {
             return true;
@@ -588,18 +601,17 @@ public class PlatformCalendarDataProxy extends DataProxy {
         String mSelectionClause = "";
         ArrayList<String> mSelectionArgs = new ArrayList<String>();
 
-        if(this.calendarMode == Mode.RESOURCES)
-        {
+        if (this.calendarMode == Mode.RESOURCES) {
             mSelectionClause += CalendarContract.Calendars.OWNER_ACCOUNT + " GLOB ?";
             mSelectionArgs.add(Mode.RESOURCES.resourcesGlob);
         }
 
         mUpdateValues.put("SYNC_EVENTS", 1);
         resolver.update(
-            CalendarContract.Calendars.CONTENT_URI,
-            mUpdateValues,
-            mSelectionClause,
-            mSelectionArgs.toArray(new String[0]));
+                CalendarContract.Calendars.CONTENT_URI,
+                mUpdateValues,
+                mSelectionClause,
+                mSelectionArgs.toArray(new String[0]));
     }
 
     public String getAccount() {

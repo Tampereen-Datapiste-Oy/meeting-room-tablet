@@ -388,7 +388,7 @@ public class CalendarVisualizer extends HorizontalScrollView implements Reservat
                     + touchedTimeSpan.getStart().toGMTString() + "-"
                     + touchedTimeSpan.getEnd().toGMTString());
             invalidate();
-            v.performClick();
+            // v.performClick();
         }
         return false; // do not interfere with onClick logic
     }
