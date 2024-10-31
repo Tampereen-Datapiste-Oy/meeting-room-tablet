@@ -279,6 +279,17 @@ public class PlatformCalendarDataProxy extends DataProxy {
         }
     }
 
+    /**
+     * Added so I can call the sync from outside the class.
+     * @param room - The room to sync
+     * @throws ReservatorException - If the account has been deleted
+     */
+    public void syncGoogleCalendarAccount(Room room) throws ReservatorException {
+        PlatformCalendarRoom plcRoom = (PlatformCalendarRoom) room;
+        String accountName = getAccountName(plcRoom.getId());
+        syncGoogleCalendarAccount(accountName);
+    }
+
     @Override
     public Vector<Room> getRooms() {
         setSyncOn();

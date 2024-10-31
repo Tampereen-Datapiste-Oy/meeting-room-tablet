@@ -32,6 +32,7 @@ import com.futurice.android.reservator.model.Reservation;
 import com.futurice.android.reservator.model.ReservatorException;
 import com.futurice.android.reservator.model.Room;
 import com.futurice.android.reservator.model.TimeSpan;
+import com.futurice.android.reservator.model.platformcalendar.PlatformCalendarDataProxy;
 import com.futurice.android.reservator.view.EditReservationPopup;
 import com.futurice.android.reservator.view.LobbyReservationRowView;
 import com.futurice.android.reservator.view.RoomReservationPopup;
@@ -48,12 +49,13 @@ import butterknife.ButterKnife;
 public class RoomActivity extends ReservatorActivity implements OnMenuItemClickListener,
         DataUpdatedListener, AddressBookUpdatedListener {
     public static final String ROOM_EXTRA = "room";
-    public static final long ROOMLIST_REFRESH_PERIOD = 60 * 1000;
+    public static final long ROOMLIST_REFRESH_PERIOD = 20 * 1000;
     final Handler handler = new Handler();
     final Runnable refreshDataRunnable = new Runnable() {
         @Override
         public void run() {
             Log.v("Refresh", "refreshing room info");
+            syncData();
             refreshData();
             startAutoRefreshData();
         }
@@ -317,6 +319,19 @@ public class RoomActivity extends ReservatorActivity implements OnMenuItemClickL
     @Override
     public void onPrehended() {
         this.finish();
+    }
+
+    private void syncData() {
+        if (proxy instanceof PlatformCalendarDataProxy) {
+            Log.d("RoomActivity", "The proxy is an instance of PlatformCalendarProxy, syncing calendar");
+            try {
+                ((PlatformCalendarDataProxy) proxy).syncGoogleCalendarAccount(currentRoom);
+            } catch (ReservatorException exception) {
+                Log.e(exception.getMessage(), Arrays.toString(exception.getStackTrace()));
+            }
+        } else {
+            Log.d("RoomActivity", "The proxy is not an instance of " + proxy.getClass());
+        }
     }
 
     private void refreshData() {
