@@ -482,6 +482,9 @@ public class PlatformCalendarDataProxy extends DataProxy {
     private String makeEventTitle(final String roomName, final long eventId, final String storedTitle, final String organizer,
                                   final String defaultTitle) {
         for (String attendee : getAuthoritySortedAttendees(eventId)) {
+            if (storedTitle != null && !storedTitle.isEmpty()) {
+                return storedTitle;
+            }
             if (attendee != null && !attendee.isEmpty() && !attendee.equals(roomName)) {
                 return attendee;
             }
